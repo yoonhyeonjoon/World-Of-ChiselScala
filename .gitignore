@@ -2,3 +2,7 @@
 /PassThru.fir
 /PassThru.v
 /test_run_dir/
+/.gradle/
+/.idea/
+/build/
+/gradle/
