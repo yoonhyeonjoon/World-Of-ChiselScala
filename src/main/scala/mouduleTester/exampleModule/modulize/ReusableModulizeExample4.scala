@@ -16,6 +16,7 @@ class PassThru(n: Int) extends Module {
   })
   //     io.out.x := io.in.x
   //     io.out.s := io.in.s
+
   io.in <> io.out
 }
 

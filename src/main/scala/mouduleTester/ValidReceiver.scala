@@ -4,7 +4,6 @@ import chisel3._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import chisel3.util.Valid
 import layered.stage.ElkStage
-import mouduleTester.exampleModule.DelayNCycles
 
 class ValidReceiver(n: Int) extends Module {
   val io = IO(new Bundle {
