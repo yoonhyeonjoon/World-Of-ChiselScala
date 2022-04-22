@@ -1,12 +1,11 @@
-package mouduleTester.exampleModule
+package mouduleTester.exampleModule.decoupledExample
 
 import chisel3._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import chisel3.tester.{testableClock, testableData}
 import chisel3.util.{Counter, Decoupled, Valid}
 import chiseltest.RawTester.test
 import chiseltest.experimental.expose
-import layered.stage.ElkStage
+import freechips.rocketchip.amba.axi4.AXI4Imp
 
 //이 모듈은 실행되지 않음
 //class LoopyCounter(width: Int) extends Module {
@@ -85,20 +84,20 @@ object MakeValid extends App {
 
 
   // println(getVerilog(new ValidReceiver(4)))
-  test(new CountWhenReady2(4)) { c =>
-    for (cycle <- 0 until 20) {
-      c.io.en.poke(true.B)
-      if(cycle == 3)  c.io.out.ready.poke(true.B)
-
-
-      try{
-        println(s"cycle: $cycle : ${c.io.out.valid.peek()} / ${c.io.out.bits.peek()} / ${c.ff.peek()}")
-      }
-      catch { case e : Exception => }
-
-      c.clock.step()
-    }
-  }
+//  test(new DecoupledControlTest(4)) { c =>
+//    for (cycle <- 0 until 20) {
+//      c.io.en.poke(true.B)
+//      if(cycle == 3)  c.io.out.ready.poke(true.B)
+//
+//
+//      try{
+//        println(s"cycle: $cycle : ${c.io.out.valid.peek()} / ${c.io.out.bits.peek()} / ${c.ff.peek()}")
+//      }
+//      catch { case e : Exception => }
+//
+//      c.clock.step()
+//    }
+//  }
 
 
 }

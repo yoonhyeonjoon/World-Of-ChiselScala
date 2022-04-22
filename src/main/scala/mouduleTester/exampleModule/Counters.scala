@@ -70,7 +70,6 @@ class MyCounter3(maxVal: Int) extends Module {
   val count = RegInit(0.U(chisel3.util.log2Ceil(maxVal+1).W))
   when (io.en) {
     when (count < maxVal.U) {
-      //      printf("incrementing to %d\n", count)
       printf(s"incrementing to $count\n")
       count := count + 1.U
     } .otherwise {
@@ -85,26 +84,17 @@ class MyCounter3(maxVal: Int) extends Module {
 object CounterExample extends App{
 
 
-  (new ChiselStage).emitVerilog(new MyCounterEx1(5))
-  (new ChiselStage).emitVerilog(new MyCounter2(5))
+//  (new ChiselStage).emitVerilog(new MyCounterEx1(5))
+//  (new ChiselStage).emitVerilog(new MyCounter2(5))
 //  (new ChiselStage).emitVerilog(new MyCounter2(5))
   (new ChiselStage).emitVerilog(new MyCounter3(15))
 
-  test(new MyCounter2(3)) { c =>
-    c.io.en.poke(1.B)
-    c.clock.step()
-    c.clock.step()
-    c.clock.step()
-    c.clock.step()
-    c.clock.step()
+  test(new MyCounter3(10)){c =>
+    c.io.en.poke(true.B)
+    for (cycle <- 0 until 1000) {
+      c.clock.step()
+      println(s"${Console.GREEN} cycle : ${cycle} -> ${c.io.out.peek()}  ${Console.RESET}")
+    }
   }
-
-//  test(new MyCounter(CounterParams(5, 0))){c =>
-//    c.io.en.poke(true.B)
-//    for (cycle <- 0 until 1000) {
-//      c.clock.step()
-//      println(s"cycle : ${cycle} -> ${c.io.out.peek()}")
-//    }
-//  }
 
 }

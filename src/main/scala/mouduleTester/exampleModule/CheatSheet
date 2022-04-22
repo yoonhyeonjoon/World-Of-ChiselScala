@@ -1,0 +1,8 @@
+  val counter = Module(new MyCounter3(10))
+  counter.io.en := io.enable
+  val simpleWire = Wire(UInt(10.W))
+  when( counter.io.out === 0.U){ simpleWire := 21.U }.otherwise { simpleWire := 0.U}
+  io.cout1 := (counter.io.out % 5.U) + simpleWire
+
+
+println(s"${Console.GREEN} cycle : ${cycle} -> ${c.io.cout1.peek()}  ${Console.RESET}")
