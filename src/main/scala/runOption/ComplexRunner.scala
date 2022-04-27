@@ -6,7 +6,7 @@ import layered.stage.ElkStage
 
 object ComplexRunner {
 
-  def generating(module : =>RawModule, dir : String = "test_run_dir/gcd"){
+  def generating(module : =>RawModule, dir : String = "gcd"){
     (new ChiselStage).emitVerilog(module)
     (new ElkStage).execute(
       Array("-td", dir),

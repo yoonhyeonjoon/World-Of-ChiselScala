@@ -29,7 +29,6 @@ repositories {
 
 
 dependencies {
-
     implementation("org.scala-lang:scala-compiler:2.12.15")// https://mvnrepository.com/artifact/org.scala-lang/scala-compiler //
     implementation("org.scala-lang:scala-library:2.12.15")
     implementation("org.scala-lang:scala-reflect:2.12.15")
@@ -38,8 +37,6 @@ dependencies {
     implementation("org.scalatest:scalatest_2.12:3.2.11")
     implementation("edu.berkeley.cs:chiseltest_2.12:0.5.2")
     implementation("org.easysoc:layered-firrtl_2.12:1.1.1")
-//    addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.5.0" cross CrossVersion.full),
-
 }
 
 

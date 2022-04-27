@@ -1,0 +1,45 @@
+package functional
+
+import chisel3.util.{Counter, Enum, is, switch}
+import chisel3.{Bool, Bundle, Module, Output, RegInit, UInt, fromBooleanToLiteral, fromIntToLiteral, when}
+
+
+class MockClockGenerator(speed : Int) extends Module {
+
+  class MockClockBundle extends Bundle {
+    val clock: Bool = Output(Bool())
+  }
+
+  val io: MockClockBundle = IO(new MockClockBundle())
+
+  val high :: low :: Nil = Enum(2)
+  val state: UInt = RegInit(high)
+  val (count, wrap) = Counter(true.B, speed)
+
+  when(count < (speed/2).U)
+  {
+    state := low
+  }.otherwise
+  {
+    state := high
+  }
+  io.clock := false.B
+
+  switch(state){
+    is(high) {
+      io.clock := true.B
+    }
+    is(low){
+      io.clock := false.B
+    }
+  }
+
+}
+
+
+//  //Successful
+//  when(state === high) {
+//    io.clockB := true.B
+//  }.otherwise{
+//    io.clockB := false.B
+//  }
