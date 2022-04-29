@@ -3,11 +3,9 @@ package mouduleTester.exampleModule.decoupledExample
 import chisel3._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import chisel3.tester.{testableClock, testableData}
-import chisel3.util.{Counter, Decoupled, Queue}
+import chisel3.util.Decoupled
 import chiseltest.RawTester.test
 import chiseltest.experimental.expose
-import freechips.rocketchip.amba.axi4.AXI4Imp
-import freechips.rocketchip.tilelink.TLImp
 import layered.stage.ElkStage
 
 import scala.language.postfixOps
