@@ -36,10 +36,48 @@ class MockClockGenerator(speed : Int) extends Module {
 
 }
 
+class MockClockResetGeneratorvalue(speed : Int) extends Module {
 
-//  //Successful
-//  when(state === high) {
-//    io.clockB := true.B
-//  }.otherwise{
-//    io.clockB := false.B
-//  }
+  class MockClockResetBundle extends Bundle {
+    val clock: Bool = Output(Bool())
+    val reset: Bool = Output(Bool())
+  }
+
+  val io: MockClockResetBundle = IO(new MockClockResetBundle())
+
+  val high :: low :: Nil = Enum(2)
+  val state: UInt = RegInit(high)
+  val (count, wrap) = Counter(true.B, speed)
+
+  when(count < (speed/2).U)
+  {
+    state := low
+  }.otherwise
+  {
+    state := high
+  }
+
+  io.clock := false.B
+  io.reset := false.B
+
+  switch(state){
+    is(high) {
+      io.clock := true.B
+
+      //reset
+      if(reset == true.B)
+      {
+        io.reset := true.B
+      }
+      else
+      {
+        io.reset := false.B
+      }
+
+    }
+    is(low){
+      io.clock := false.B
+    }
+  }
+
+}
