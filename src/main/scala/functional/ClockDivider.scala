@@ -1,6 +1,6 @@
 // Demo of a clock divider in Chisel.
 
-package chiselExample.exampleModule.queue.asyncExample
+package functional
 
 import chisel3._
 import chisel3.util.log2Ceil

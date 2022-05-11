@@ -1,11 +1,8 @@
 package chiselExample.exampleModule.decoupledExample
 
 import chisel3._
-import chisel3.tester.{testableClock, testableData}
 import chisel3.util.{Counter, Decoupled, Valid}
-import chiseltest.RawTester.test
 import chiseltest.experimental.expose
-import freechips.rocketchip.amba.axi4.AXI4Imp
 
 //이 모듈은 실행되지 않음
 //class LoopyCounter(width: Int) extends Module {

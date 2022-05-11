@@ -9,16 +9,17 @@ import chiseltest.RawTester.test
 
 class SimpleQueue2(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) extends Module {
 
-  val io = IO(new Bundle {
-    val en   = Input(Bool())
-    val qin  = Input(UInt(5.W))
+  class simpleQueueIO extends Bundle {
+    val en: Bool = Input(Bool())
+    val qin: UInt = Input(UInt(5.W))
+    val qout: DecoupledIO[UInt] = Decoupled(UInt())
+    val den: UInt = Output(UInt())
+  }
 
-    val qout = Decoupled(UInt())
-    val den = Output(UInt())
-  })
+  val io: simpleQueueIO = IO(new simpleQueueIO)
 
   private val q = Module(new Queue(UInt(), numEntries, pipe=pipe, flow=flow))
-  val temp_r = RegInit(0.U(2.W))
+  val temp_r: UInt = RegInit(0.U(2.W))
   q.io.enq.valid := io.en
   q.io.enq.bits := io.qin
   io.qout <> q.io.deq

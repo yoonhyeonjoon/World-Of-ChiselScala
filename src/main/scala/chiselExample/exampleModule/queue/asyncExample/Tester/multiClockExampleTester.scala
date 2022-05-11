@@ -4,8 +4,9 @@ package chiselExample.exampleModule.queue.asyncExample.Tester
 import chisel3._
 import chisel3.tester.{testableClock, testableData}
 import chisel3.util._
-import chiselExample.exampleModule.queue.asyncExample.ClockDivider
+import chiselExample.exampleModule.queue.asyncExample.TransmitModule
 import chiseltest.RawTester.test
+import functional.ClockDivider
 import runOption.ComplexRunner.generating
 
 object AsyncCrossingDemoUtil {
