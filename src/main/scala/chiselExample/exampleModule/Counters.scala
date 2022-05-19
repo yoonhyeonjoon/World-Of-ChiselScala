@@ -32,7 +32,6 @@ class MyCounter(cp: CounterParams) extends Module {
     val out: UInt = Output(UInt())
   }
 
-
   val io: ExplicitBundle = IO(new ExplicitBundle)
 
   val hotValue: UInt = chisel3.util.Mux1H(Seq(
@@ -83,10 +82,7 @@ class MyCounter3(maxVal: Int) extends Module {
 
 object CounterExample extends App{
 
-
-//  (new ChiselStage).emitVerilog(new MyCounterEx1(5))
-//  (new ChiselStage).emitVerilog(new MyCounter2(5))
-//  (new ChiselStage).emitVerilog(new MyCounter2(5))
+  //  (new ChiselStage).emitVerilog(new MyCounter2(5))
   (new ChiselStage).emitVerilog(new MyCounter3(15))
 
   test(new MyCounter3(10)){c =>

@@ -22,6 +22,7 @@ class ComplexQueue(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) e
   {
     ranWire := FibonacciLFSR.maxPeriod(5)
 
+
     val switch = WireInit(Bool(), true.B)
     when(ranWire % 3.U === 0.U)
     {
