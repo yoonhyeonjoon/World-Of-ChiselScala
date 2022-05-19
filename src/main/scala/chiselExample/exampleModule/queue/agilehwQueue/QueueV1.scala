@@ -5,51 +5,39 @@ import chisel3.tester._
 import chisel3.util.Decoupled
 import chiseltest.RawTester.test
 
-class QueueIO(bitWidth: Int) extends Bundle {
-  val enq = Flipped(Decoupled(UInt(bitWidth.W)))
-  val deq = Decoupled(UInt(bitWidth.W))
+
+
+class MyQueueV1(numEntries: Int, bitWidth: Int) extends Module {
+  val io: QueueIO = IO(new QueueIO(bitWidth))
+  require(numEntries > 0)
+  // enqueue into index numEntries-1 (last) and dequeue from index 0 (head)
+  val entries = Seq.fill(numEntries)(Reg(UInt(bitWidth.W)))
+  val fullBits = Seq.fill(numEntries)(RegInit(false.B))
+  val shiftDown = io.deq.fire || !fullBits.head
+  io.enq.ready := !fullBits.last || shiftDown
+  io.deq.valid := fullBits.head
+  io.deq.bits := entries.head
+  when (shiftDown) { // dequeue / shift
+    for (i <- 0 until numEntries - 1) {
+      entries(i) := entries(i+1)
+      fullBits(i) := fullBits(i+1)
+    }
+    fullBits.last := false.B
+  }
+  when (io.enq.fire) { // enqueue
+    entries.last := io.enq.bits
+    fullBits.last := true.B
+  }
+  //     when (shiftDown || io.enq.fire) {
+  //         entries.foldRight(io.enq.bits){(thisEntry, lastEntry) => thisEntry := lastEntry; thisEntry}
+  //         fullBits.foldRight(io.enq.fire){(thisEntry, lastEntry) => thisEntry := lastEntry; thisEntry}
+  //     }
 }
 
-class MyQueueV0(bitWidth: Int) extends Module {
 
-  val io = IO(new QueueIO(bitWidth))
-  val entry = Reg(UInt(bitWidth.W))
-  val full = RegInit(false.B)
+object V1QueueRunner extends App{
 
-  io.enq.ready := !full || io.deq.fire
-  io.deq.valid := full
-  io.deq.bits := entry
-
-  when (io.deq.fire) {
-    full := false.B
-  }
-
-  when (io.enq.fire) {
-    entry := io.enq.bits
-    full := true.B
-  }
-
-}
-
-class QueueModel(numEntries: Int) {
-  val mq = scala.collection.mutable.Queue[Int]()
-  var deqReady = false
-
-  def attemptEnq(elem: Int) {
-    if (enqReady()) mq += elem
-  }
-
-  // call first within a cycle
-  // improve with Option & None
-  def attemptDeq() = if (deqReady) mq.dequeue() else -1
-
-  def enqReady() = mq.size < numEntries || (mq.size == numEntries && deqReady)
-  def deqValid() = mq.nonEmpty
-}
-
-object QueueRunner extends App{
-
-  def simCycle(qm: QueueModel, c: MyQueueV0, enqValid: Boolean, deqReady: Boolean, enqData: Int=0) {
+  def simCycle(qm: QueueModel, c: MyQueueV1, enqValid: Boolean, deqReady: Boolean, enqData: Int=0) {
     qm.deqReady = deqReady
     c.io.deq.ready.poke(qm.deqReady.B)
     if (c.io.deq.valid.peek.litToBoolean && deqReady) {
@@ -62,15 +50,15 @@ object QueueRunner extends App{
     if (enqValid)
       qm.attemptEnq(enqData)
     c.clock.step()
-    println(s"que State : ${qm.mq}")
+    println(qm.mq)
   }
 
-  test(new MyQueueV0(8)) { c =>
-    val qm = new QueueModel(1)
+  test(new MyQueueV1(3,8)) { c =>
+    val qm = new QueueModel(3)
     simCycle(qm, c, false, false)
     simCycle(qm, c, true, false, 1)
     simCycle(qm, c, true, false, 2)
-    simCycle(qm, c, true, true, 2)
+    simCycle(qm, c, true, true, 3)
     simCycle(qm, c, false, true)
   }
 

@@ -40,7 +40,10 @@ class MyMux2 extends Bundle {
 
 object MyMux extends App{
 
-
+  val ff = IndexedSeq(1,2,3,4,5)
+  val gggg = ff(3)
+  val ff2 = Seq(1,2,3,4,5)
+  val gggg2 = ff2(3)
   (new ChiselStage).emitVerilog(new MyMux())
   //(new ChiselStage).emitVerilog(f.asInstanceOf[RawModule])
 

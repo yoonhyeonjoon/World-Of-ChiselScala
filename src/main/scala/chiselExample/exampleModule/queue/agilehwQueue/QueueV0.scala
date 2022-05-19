@@ -5,11 +5,6 @@ import chisel3.tester._
 import chisel3.util.Decoupled
 import chiseltest.RawTester.test
 
-class QueueIO(bitWidth: Int) extends Bundle {
-  val enq = Flipped(Decoupled(UInt(bitWidth.W)))
-  val deq = Decoupled(UInt(bitWidth.W))
-}
-
 class MyQueueV0(bitWidth: Int) extends Module {
 
   val io = IO(new QueueIO(bitWidth))
@@ -31,23 +26,7 @@ class MyQueueV0(bitWidth: Int) extends Module {
 
 }
 
-class QueueModel(numEntries: Int) {
-  val mq = scala.collection.mutable.Queue[Int]()
-  var deqReady = false
-
-  def attemptEnq(elem: Int) {
-    if (enqReady()) mq += elem
-  }
-
-  // call first within a cycle
-  // improve with Option & None
-  def attemptDeq() = if (deqReady) mq.dequeue() else -1
-
-  def enqReady() = mq.size < numEntries || (mq.size == numEntries && deqReady)
-  def deqValid() = mq.nonEmpty
-}
-
-object QueueRunner extends App{
+object V0QueueRunner extends App{
 
   def simCycle(qm: QueueModel, c: MyQueueV0, enqValid: Boolean, deqReady: Boolean, enqData: Int=0) {
     qm.deqReady = deqReady
