@@ -13,7 +13,7 @@ class MyQueueV3(numEntries: Int, bitWidth: Int) extends Module {
   val io = IO(new QueueIO(bitWidth))
   require(numEntries > 1)
   require(isPow2(numEntries))
-  val entries = Reg(Vec(numEntries, UInt(bitWidth.W))) // Mem?
+  val entries = Reg(Vec(numEntries, UInt(bitWidth.W)))
   val enqIndex = RegInit(0.U(log2Ceil(numEntries).W))
   val deqIndex = RegInit(0.U(log2Ceil(numEntries).W))
   val empty = enqIndex === deqIndex

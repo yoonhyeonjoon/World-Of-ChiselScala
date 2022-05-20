@@ -1,13 +1,9 @@
 package chiselExample.exampleModule.queue.agilehwQueue
 
-import Chisel.log2Ceil
 import chisel3._
 import chisel3.tester._
-import chisel3.util.{Counter, Decoupled, PriorityEncoder, isPow2}
+import chisel3.util.Counter
 import chiseltest.RawTester.test
-import runOption.ComplexRunner.generating
-
-
 
 class MyQueueV6(numEntries: Int, bitWidth: Int, pipe: Boolean=true) extends Module {
   val io = IO(new QueueIO(bitWidth))
@@ -20,10 +16,12 @@ class MyQueueV6(numEntries: Int, bitWidth: Int, pipe: Boolean=true) extends Modu
   val indicesEqual = enqIndex.value === deqIndex.value
   val empty = indicesEqual && !maybeFull
   val full = indicesEqual && maybeFull
+
   if (pipe)
     io.enq.ready := !full || io.deq.ready
   else
     io.enq.ready := !full
+
   io.deq.valid := !empty
   io.deq.bits := entries(deqIndex.value)
   when (io.deq.fire =/= io.enq.fire) {

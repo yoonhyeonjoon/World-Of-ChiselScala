@@ -64,11 +64,11 @@ https://github.com/agile-hw/lectures/
   - Implements queueing behavior
   - Parameterized data width & number of entries
   - Latency based on occupancy
-  - Efficiency? Less bits shifting and shallower logic
+  - Efficiency? Less bits shifting and shallower logic 
 - Shortcommings
   - Capacity: loose one entry (to detect if full), and must be power of 2
   - Performance: can't simultaneously enqueue/dequeue to a full queue
-  - 
+  
 <br>
 
 ### Reclaiming Last Entry
