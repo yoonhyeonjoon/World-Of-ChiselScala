@@ -1,7 +1,7 @@
-package chiselExample
+package chiselExample.practiceNote
 
-import chisel3.util.log2Ceil
 import chisel3._
+import chisel3.util.log2Ceil
 
 
 case class CounterParams5(limit: Int, start: Int = 0) {

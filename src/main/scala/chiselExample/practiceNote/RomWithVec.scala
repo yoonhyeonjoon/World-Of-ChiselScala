@@ -1,12 +1,10 @@
-package chiselExample
+package chiselExample.practiceNote
 
 import chisel3.stage.ChiselStage
-import chisel3.tester.testableData
-import chisel3.{Bool, Bundle, Input, Module, Output, UInt, VecInit, fromBooleanToLiteral, fromIntToLiteral, fromIntToWidth}
-import chiseltest.RawTester.test
+import chisel3.{Bool, Bundle, Input, Output, RawModule, UInt, VecInit, fromBooleanToLiteral, fromIntToWidth}
 
 
-class DivByXTable(x: Int) extends Module {
+class DivByXTable(x: Int) extends RawModule {
   val io = IO(new Bundle {
     val in  = Input(UInt(4.W))
     val out = Output(Bool())
@@ -17,15 +15,16 @@ class DivByXTable(x: Int) extends Module {
   }
   val table = VecInit(results)
   io.out := table(io.in)
+
 }
 
 object DivByXTable extends App {
 
   (new ChiselStage).emitVerilog(new DivByXTable(3))
 
-  test(new DivByXTable(3)) { c =>
-    c.io.in.poke(15.U)
-    val ff = 1
-  }
+//  test(new DivByXTable(3)) { c =>
+//    c.io.in.poke(15.U)
+//    val ff = 1
+//  }
 
 }

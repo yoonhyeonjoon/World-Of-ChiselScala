@@ -1,7 +1,6 @@
-package chiselExample
+package grammarForChisel
 
 import chisel3._
-import chisel3.util.log2Ceil
 
 class MaybePair(n: Int, hasY: Boolean) extends Bundle {
   val x = Output(UInt(n.W))
@@ -12,8 +11,7 @@ class OutMod(n: Int, a: Int, useY: Boolean) extends Module {
 
   val io = IO(Output(new MaybePair(8, useY)))
   io.x := a.U
-  if (useY)
-  //     if (io.y.isDefined)
+  if (useY) //     if (io.y.isDefined)
     io.y.get := a.U
 }
 

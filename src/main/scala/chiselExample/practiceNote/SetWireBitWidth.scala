@@ -1,4 +1,4 @@
-package chiselExample
+package chiselExample.practiceNote
 
 import Chisel.fromIntToWidth
 import chisel3.{Bundle, Input, Module, Output, UInt, Vec, Wire}

@@ -1,4 +1,4 @@
-package chiselExample
+package chiselExample.practiceNote
 
 import Chisel.RegEnable
 import chisel3._

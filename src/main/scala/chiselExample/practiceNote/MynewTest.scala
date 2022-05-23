@@ -1,12 +1,11 @@
-package chiselExample
+package chiselExample.practiceNote
 
 import Chisel.Decoupled
 import chisel3._
 import chisel3.stage.ChiselStage
 import chisel3.util.{DeqIO, EnqIO}
-import chiseltest.experimental.expose
 
-class MyNewTest extends Module{
+class MynewTest extends Module{
 
 //  val io = IO(new Bundle {
 //    val in = Flipped(Decoupled(UInt(8.W)))
@@ -25,10 +24,7 @@ class MyNewTest extends Module{
 
   }
 
-
-
   private val io = IO(new IModule())
-
 
   io.in <> io.out
   io.in1 <> io.out1
@@ -40,7 +36,7 @@ class MyNewTest extends Module{
 
 }
 
-object MyNewTest extends App {
-  (new ChiselStage).emitVerilog(new MyNewTest())
+object MynewTest extends App {
+  (new ChiselStage).emitVerilog(new MynewTest())
 
 }
