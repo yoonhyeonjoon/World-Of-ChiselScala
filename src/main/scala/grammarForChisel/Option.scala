@@ -8,7 +8,6 @@ class MaybePair(n: Int, hasY: Boolean) extends Bundle {
 }
 
 class OutMod(n: Int, a: Int, useY: Boolean) extends Module {
-
   val io = IO(Output(new MaybePair(8, useY)))
   io.x := a.U
   if (useY) //     if (io.y.isDefined)
