@@ -1,16 +1,15 @@
 package chiselExample.crossBar
 
-import Chisel.{Decoupled, fromIntToWidth, log2Ceil}
+//import Chisel.{Decoupled, fromIntToWidth, log2Ceil}
 import chisel3._
-import chisel3.util.{DecoupledIO, RRArbiter}
-import chiselExample.crossBar.RingRouter.MessageNetwork
+import chisel3.util._
 
 case class XBarParamsV2(numHosts: Int, payloadSize: Int) {
   def addrBitW() = log2Ceil(numHosts + 1)
 }
 
 class MessageV2(p: XBarParamsV2) extends Bundle {
-  val addr: UInt = UInt(p.addrBitW().W)
+  val addr: UInt = UInt(p.addrBitW.W)
   val data: UInt = UInt(p.payloadSize.W)
 }
 
@@ -23,7 +22,7 @@ class XBarV2(p: XBarParamsV2) extends Module {
   val io = IO(new Bundle {
     val ports = Vec(p.numHosts, new PortIOV2(p))
   })
-  val arbs = Seq.fill(p.numHosts)(Module(new RRArbiter(new MessageNetwork(p), p.numHosts)))
+  val arbs = Seq.fill(p.numHosts)(Module(new RRArbiter(new MessageV2(p), p.numHosts)))
   for (ip <- 0 until p.numHosts) {
     io.ports(ip).in.ready := arbs.map{ _.io.in(ip).ready }.reduce{ _ || _ }
   }

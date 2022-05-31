@@ -12,6 +12,7 @@ class MynewTest extends Module{
 //    val out = Decoupled(UInt(8.W))
 //  })
 //
+
   class IModule extends Bundle{
       val in1 = EnqIO(UInt(5.W))
       val out1 = DeqIO(UInt(5.W))

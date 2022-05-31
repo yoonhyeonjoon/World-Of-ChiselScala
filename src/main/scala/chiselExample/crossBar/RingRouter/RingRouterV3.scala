@@ -30,7 +30,7 @@ class RingRouterV3[T <: chisel3.Data](p: NetworkParams[T], id: Int) extends Modu
   portsRouted.zip(xbar.io.ports).foreach{ case (extPort, xbarPort) => extPort <> xbarPort }
 }
 
-class RingNetwork[T <: chisel3.Data](p: NetworkParams[T]) extends Network[T](p) {
+class RingNetworkV3[T <: chisel3.Data](p: NetworkParams[T]) extends Network[T](p) {
   val routers = Seq.tabulate(p.numHosts){ id => new RingRouterV3(p, id)}
   routers.foldLeft(routers.last){ (prev, curr) => prev.io.ports(1) <> curr.io.ports(0); curr }
   routers.zip(io.ports).foreach { case (router, port) => router.io.ports(2) <> port}

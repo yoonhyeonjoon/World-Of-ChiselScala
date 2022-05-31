@@ -4,7 +4,7 @@ import Chisel.Decoupled
 import chisel3._
 import chisel3.stage.ChiselStage
 import chisel3.tester.{testableClock, testableData}
-import chisel3.util.{Counter, DecoupledIO, Queue}
+import chisel3.util.{Counter, Decoupled, DecoupledIO, Queue}
 import chiseltest.RawTester.test
 
 class SimpleQueue2(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) extends Module {
@@ -12,7 +12,7 @@ class SimpleQueue2(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) e
   class simpleQueueIO extends Bundle {
     val en: Bool = Input(Bool())
     val qin: UInt = Input(UInt(5.W))
-    val qout: DecoupledIO[UInt] = Decoupled(UInt())
+//    val qout: DecoupledIO[UInt] = Decoupled(UInt())
     val den: UInt = Output(UInt())
   }
 
@@ -22,11 +22,11 @@ class SimpleQueue2(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) e
   val temp_r: UInt = RegInit(0.U(2.W))
   q.io.enq.valid := io.en
   q.io.enq.bits := io.qin
-  io.qout <> q.io.deq
+//  io.qout <> q.io.deq
   io.den := temp_r
 
-}
 
+}
 
 object SimpleQueue2 extends App {
 
