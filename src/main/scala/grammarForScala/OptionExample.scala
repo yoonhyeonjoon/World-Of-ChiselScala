@@ -1,10 +1,10 @@
 package grammarForScala
 
-class Option {
+class OptionExample {
 
-  val l = Seq.tabulate(5)(i => if (i % 2 == 1) Some(i) else None)
+  val optionExample1 = Seq.tabulate(5)(i => if (i % 2 == 1) Some(i) else None)
 
-  l foreach { x =>
+  optionExample1 foreach { x =>
     if (x.isDefined) println(x.get)
   }
 

@@ -1,8 +1,22 @@
-package chiselExample.crossBar.RingRouter
+package chiselExample.ringRouter
 
 import chisel3._
-import chisel3.util.{Decoupled, DecoupledIO, RRArbiter}
-import chiselExample.crossBar._
+import chisel3.util.RRArbiter
+
+
+class XBarRingRouter[T <: chisel3.Data](p: NetworkParams[T]) extends Network[T](p) {
+  val arbs: Seq[RRArbiter[MessageRouter[T]]] = Seq.fill(p.numHosts)(Module(new RRArbiter(new MessageRouter(p), p.numHosts)))
+  for (ip <- 0 until p.numHosts) {
+    io.ports(ip).in.ready := arbs.map{ _.io.in(ip).ready }.reduce{ _ || _ }
+  }
+  for (op <- 0 until p.numHosts) {
+    arbs(op).io.in.zip(io.ports).foreach { case (arbIn, port) =>
+      arbIn.bits <> port.in.bits
+      arbIn.valid := port.in.valid && (port.in.bits.addr === op.U)
+    }
+    io.ports(op).out <> arbs(op).io.out
+  }
+}
 
 //RingRouter Revised for Bidirectional & Use of XBar
 class RingRouterV3[T <: chisel3.Data](p: NetworkParams[T], id: Int) extends Module {

@@ -1,6 +1,5 @@
 package chiselExample.crossBar
 
-//import Chisel.{Decoupled, fromIntToWidth, log2Ceil}
 import chisel3._
 import chisel3.util._
 
@@ -9,7 +8,7 @@ case class XBarParamsV2(numHosts: Int, payloadSize: Int) {
 }
 
 class MessageV2(p: XBarParamsV2) extends Bundle {
-  val addr: UInt = UInt(p.addrBitW.W)
+  val addr: UInt = UInt(p.addrBitW().W)
   val data: UInt = UInt(p.payloadSize.W)
 }
 
@@ -20,7 +19,7 @@ class PortIOV2(p: XBarParamsV2) extends Bundle {
 
 class XBarV2(p: XBarParamsV2) extends Module {
   val io = IO(new Bundle {
-    val ports = Vec(p.numHosts, new PortIOV2(p))
+    val ports   = Vec(p.numHosts, new PortIOV2(p))
   })
   val arbs = Seq.fill(p.numHosts)(Module(new RRArbiter(new MessageV2(p), p.numHosts)))
   for (ip <- 0 until p.numHosts) {
