@@ -1,13 +1,14 @@
 package chiselExample.queue.agilehwQueue
 
 import chisel3._
+import chisel3.stage.ChiselStage
 import chisel3.tester._
 import chisel3.util.{Counter, Decoupled}
 import chiseltest.RawTester.test
 
 
-//Generics
 class QueueV7[T <: chisel3.Data](numEntries: Int, gen: T, pipe: Boolean=true) extends Module {
+
   val io = IO(new Bundle {
     val enq = Flipped(Decoupled(gen))
     val deq = Decoupled(gen)
@@ -40,6 +41,8 @@ class QueueV7[T <: chisel3.Data](numEntries: Int, gen: T, pipe: Boolean=true) ex
 }
 
 object QueueV7 extends App {
+
+  (new ChiselStage).emitVerilog(new QueueV7(3, UInt(8.W)))
 
   def simCycle(qm: QueueModel, c: QueueV7[UInt], enqReady: Boolean, deqReady: Boolean, enqData: Int=0) {
     qm.deqReady = deqReady
