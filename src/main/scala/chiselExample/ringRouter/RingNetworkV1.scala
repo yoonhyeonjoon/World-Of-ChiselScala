@@ -1,16 +1,19 @@
 package chiselExample.ringRouter
 
 import chisel3._
-import chisel3.util.Decoupled
-import chiselExample.crossBar.{MessageV3, PortIOV3, XBarParamsV3}
+import chisel3.util.{Decoupled, DecoupledIO}
+import chiselExample.crossBar.PortIOV3
 
 //First Implementation of a Ring Network
-class RingRouterV1[T <: chisel3.Data](p: NetworkParams[T], id: Int) extends Module {
-  val io = IO(new Bundle{
-    val in = Flipped(Decoupled(new MessageRouter(p)))
-    val out = Decoupled(new MessageRouter(p))
-    val host = new PortIORouter(p)
-  })
+class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends Module {
+
+  class RingRouterV1Bundle extends Bundle{
+    val in: DecoupledIO[RingMessage[T]] = Flipped(Decoupled(new RingMessage(p)))
+    val out: DecoupledIO[RingMessage[T]] = Decoupled(new RingMessage(p))
+    val host = new RingPortIO(p)
+  }
+
+  val io: RingRouterV1Bundle = IO(new RingRouterV1Bundle)
   val forMe: Bool = (io.in.bits.addr === id.U) && io.in.valid
   // INCOMPLETE, but gives spirit
   io.host.in.ready := io.out.ready
@@ -21,9 +24,10 @@ class RingRouterV1[T <: chisel3.Data](p: NetworkParams[T], id: Int) extends Modu
   io.out.bits := Mux(io.host.in.fire, io.host.in.bits, io.in.bits)
 }
 
-class RingNetworkV1[T <: chisel3.Data](p: NetworkParams[T]) extends Module {
+class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
+
   class RingNetworkV1Port extends Bundle{
-    val ports: Vec[PortIOV3[T]] = Vec(p.numHosts, new PortIORouter(p))
+    val ports: Vec[RingPortIO[T]] = Vec(p.numHosts, new RingPortIO(p))
   }
 
   val io: RingNetworkV1Port = IO(new RingNetworkV1Port())

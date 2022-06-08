@@ -2,14 +2,14 @@ package chiselExample.ringRouter
 
 import chisel3.{Bundle, Module, Vec}
 
-abstract class Network[T <: chisel3.Data](p: NetworkParams[T]) extends Module {
+abstract class Network[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
   class NetWorkBundle extends Bundle {
-    val ports: Vec[PortIORouter[T]] = Vec(p.numHosts, new PortIORouter(p))
+    val ports: Vec[RingPortIO[T]] = Vec(p.numHosts, new RingPortIO(p))
   }
   val io: NetWorkBundle = IO(new NetWorkBundle)
 }
 
-class RingNetworkV2[T <: chisel3.Data](p: NetworkParams[T]) extends Network[T](p) {
+class RingNetworkV2[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[T](p) {
   val routers: Seq[RingRouterV1[T]] = Seq.tabulate(p.numHosts){ id => new RingRouterV1(p, id)}
 
   routers.foldLeft(routers.last){
