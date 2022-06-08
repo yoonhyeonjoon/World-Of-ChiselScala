@@ -2,7 +2,7 @@ package chiselExample.ringRouter
 
 import chisel3._
 import chisel3.util.{Decoupled, DecoupledIO}
-import chiselExample.crossBar.PortIOV3
+import runOption.ComplexRunner.generating
 
 //First Implementation of a Ring Network
 class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends Module {
@@ -39,4 +39,9 @@ class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
     curr
   }
   routers.zip(io.ports).foreach { case (router, port) => router.io.host <> port}
+}
+
+
+object RingNetworkV1 extends App {
+      generating(new RingNetworkV1(RingNetworkParams(5, UInt(5.W))))
 }

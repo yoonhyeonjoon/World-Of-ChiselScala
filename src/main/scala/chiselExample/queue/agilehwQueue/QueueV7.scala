@@ -6,7 +6,6 @@ import chisel3.tester._
 import chisel3.util.{Counter, Decoupled}
 import chiseltest.RawTester.test
 
-
 class QueueV7[T <: chisel3.Data](numEntries: Int, gen: T, pipe: Boolean=true) extends Module {
 
   val io = IO(new Bundle {

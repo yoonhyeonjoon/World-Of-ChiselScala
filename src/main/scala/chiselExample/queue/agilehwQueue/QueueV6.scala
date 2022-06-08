@@ -37,7 +37,7 @@ class MyQueueV6(numEntries: Int, bitWidth: Int, pipe: Boolean=true) extends Modu
 }
 
 
-object V6QueueRunner extends App{
+object printlnQueueRunner extends App{
 
   def simCycle(qm: QueueModel, c: MyQueueV6, enqValid: Boolean, deqReady: Boolean, enqData: Int=0) {
     qm.deqReady = deqReady

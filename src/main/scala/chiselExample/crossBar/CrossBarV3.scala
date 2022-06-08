@@ -2,6 +2,10 @@ package chiselExample.crossBar
 
 import chisel3._
 import chisel3.util._
+import runOption.ComplexRunner.generating
+
+
+//https://www.chisel-lang.org/chisel3/docs/cookbooks/cookbook.html#aliased-bundle-fields
 
 case class XBarParamsV3[T <: chisel3.Data](numHosts: Int, payloadT: T) {
   def addrBitW(): Int = log2Ceil(numHosts + 1)
@@ -33,4 +37,9 @@ class XBarV3[T <: chisel3.Data](p: XBarParamsV3[T]) extends Module {
     }
     io.ports(op).out <> arbs(op).io.out
   }
+}
+
+object XBarV3 extends App {
+  val caseClass: XBarParamsV3[UInt] = XBarParamsV3(numHosts = 5, payloadT = UInt(6.W))
+  generating(new XBarV3(caseClass))
 }

@@ -2,6 +2,7 @@ package chiselExample.crossBar
 
 import chisel3._
 import chisel3.util._
+import runOption.ComplexRunner.generating
 
 case class XBarParamsV2(numHosts: Int, payloadSize: Int) {
   def addrBitW() = log2Ceil(numHosts + 1)
@@ -13,6 +14,7 @@ class MessageV2(p: XBarParamsV2) extends Bundle {
 }
 
 class PortIOV2(p: XBarParamsV2) extends Bundle {
+  val fff: MessageV2 = new MessageV2(p)
   val in: DecoupledIO[MessageV2] = Flipped(Decoupled(new MessageV2(p)))
   val out: DecoupledIO[MessageV2] = Decoupled(new MessageV2(p))
 }
@@ -35,3 +37,7 @@ class XBarV2(p: XBarParamsV2) extends Module {
 }
 
 // declaration example: new XBar(XBarParams(4,64))
+
+object XBarV2 extends App {
+  generating(new XBarV2(XBarParamsV2(numHosts = 5, payloadSize = 4)))
+}
