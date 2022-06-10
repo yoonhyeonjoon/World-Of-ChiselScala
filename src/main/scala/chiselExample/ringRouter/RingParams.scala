@@ -9,7 +9,7 @@ case class RingNetworkParams[T <: chisel3.Data](numHosts: Int, payloadT: T) {
 
 class RingMessage[T <: chisel3.Data](p: RingNetworkParams[T]) extends Bundle {
   val addr: UInt = UInt(p.addrBitW().W)
-  val datas: T = p.payloadT.cloneType
+  val data: T = p.payloadT.cloneType
 }
 
 class RingPortIO[T <: chisel3.Data](p: RingNetworkParams[T]) extends Bundle {

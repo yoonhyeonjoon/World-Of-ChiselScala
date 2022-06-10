@@ -15,7 +15,7 @@ class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
 
   val io: RingRouterV1Bundle = IO(new RingRouterV1Bundle)
   val forMe: Bool = (io.in.bits.addr === id.U) && io.in.valid
-  // INCOMPLETE, but gives spirit
+
   io.host.in.ready := io.out.ready
   io.host.out.valid := forMe
   io.host.out.bits := io.in.bits
@@ -26,22 +26,33 @@ class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
 
 class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
 
-  class RingNetworkV1Port extends Bundle{
+  class RingNetworkV1Port extends Bundle
+  {
     val ports: Vec[RingPortIO[T]] = Vec(p.numHosts, new RingPortIO(p))
   }
 
   val io: RingNetworkV1Port = IO(new RingNetworkV1Port())
 
-  val routers: Seq[RingRouterV1[T]] = Seq.tabulate(p.numHosts){ id => new RingRouterV1(p, id)}
+  val routers: Seq[RingRouterV1[T]] = Seq.tabulate(p.numHosts){ id => Module(new RingRouterV1(p, id))}
 
-  routers.foldLeft(routers.last){
-    (prev, curr) => prev.io.out <> curr.io.in
-    curr
-  }
+//  routers.foldLeft(routers.last){
+//    (prev, curr) => prev.io.out <> curr.io.in
+//    curr
+//  }
+//  routers(0).io.in <> routers(1).io.out
+//  routers(0).io.out <> routers(1).io.in
+
+  routers(1).io.in.bits  := routers(0).io.in.bits
+  routers(1).io.in.valid := routers(0).io.in.valid
+
+//  <> routers(1).io.out
+
   routers.zip(io.ports).foreach { case (router, port) => router.io.host <> port}
 }
 
 
 object RingNetworkV1 extends App {
-      generating(new RingNetworkV1(RingNetworkParams(5, UInt(5.W))))
+
+  //  generating(new RingRouterV1(RingNetworkParams(2, UInt(5.W)), 0))
+  generating(new RingNetworkV1(RingNetworkParams(2, UInt(5.W))))
 }

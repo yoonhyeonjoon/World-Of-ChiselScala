@@ -41,8 +41,8 @@ class RingRouterV3[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
     val routed = Wire(new RingPortIO(xbarParams))
     // INCOMPLETE, need to connect ready & valids
     routed.in.bits.addr := nextHop(port.in.bits.addr)
-    routed.in.bits.datas := port.in.bits
-    port.out.bits := routed.out.bits.datas
+    routed.in.bits.data := port.in.bits
+    port.out.bits := routed.out.bits.data
     routed
   }
 
@@ -52,7 +52,19 @@ class RingRouterV3[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
 
 class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[T](p) {
   val routers: Seq[RingRouterV3[T]] = Seq.tabulate(p.numHosts){ id => Module(new RingRouterV3(p, id)) }
-  routers.foldLeft(routers.last){ (prev, curr) => prev.io.ports(1) <> curr.io.ports(0); curr }
+//  routers.foldLeft(routers.last){
+//    (prev, curr) =>
+//      prev.io.ports(1).out <> curr.io.ports(0).in
+//      prev.io.ports(1).in <> curr.io.ports(0).out
+////      prev.io.ports(1) <> curr.io.ports(0)
+//      curr
+//  }
+
+  routers(0).io.ports(1) <> routers(2).io.ports(1)
+  routers(1).io.ports(1) <> routers(0).io.ports(1)
+  routers(2).io.ports(1) <> routers(1).io.ports(1)
+
+
   routers.zip(io.ports).foreach { case (router, port) => router.io.ports(2) <> port }
 }
 
@@ -61,5 +73,7 @@ class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[
 
 object ComplexQueue extends App {
   //UInt(p.payloadSize.W)
-    generating(new RingNetworkV3(p = RingNetworkParams(5, UInt(5.W))))
+
+    generating(new RingRouterV3(p = RingNetworkParams(5, UInt(5.W)), id = 0))
+//    generating(new RingNetworkV3(p = RingNetworkParams(5, UInt(5.W))))
 }

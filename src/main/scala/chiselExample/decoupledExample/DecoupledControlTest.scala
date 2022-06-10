@@ -42,7 +42,7 @@ class DecoupledControlTest(maxVal: Int) extends Module {
 
     io.decoupled.valid := switch
 
-  }.otherwise
+   }.otherwise
   {
     io.decoupled.bits := 0.U
     io.decoupled.valid := false.B
