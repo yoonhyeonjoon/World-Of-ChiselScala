@@ -1,4 +1,4 @@
-package mouduleTester
+package chiselExample.mouduleTester
 
 import Chisel.Fill
 import chisel3._

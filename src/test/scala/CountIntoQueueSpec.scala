@@ -1,8 +1,8 @@
 import Chisel.fromBooleanToLiteral
 import chisel3.tester.{testableClock, testableData}
+import chiselExample.mouduleTester.CountIntoQueue
 import chiseltest.RawTester.test
 import org.scalatest.flatspec.AnyFlatSpec
-import mouduleTester.CountIntoQueue
 
 class CountIntoQueueSpec extends AnyFlatSpec {
 

@@ -1,4 +1,4 @@
-package mouduleTester
+package chiselExample.mouduleTester
 
 import chisel3.internal.BaseModule
 import chisel3.{RawModule, _}

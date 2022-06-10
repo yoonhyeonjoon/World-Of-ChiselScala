@@ -3,8 +3,8 @@ package chiselExample.arbiter
 import chisel3._
 import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
 import chisel3.util.Cat
+import chiselExample.mouduleTester.ValidReceiver
 import layered.stage.ElkStage
-import mouduleTester.ValidReceiver
 import runOption.ComplexRunner.generating
 
 class ConvUIntToOH(inWidth: Int) extends Module {
