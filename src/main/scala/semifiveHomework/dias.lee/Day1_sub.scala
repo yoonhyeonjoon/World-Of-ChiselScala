@@ -1,3 +1,5 @@
+package semifiveHomework.`dias.lee`
+
 object Solution {
 
   println(1)

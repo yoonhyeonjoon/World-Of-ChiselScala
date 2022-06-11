@@ -1,3 +1,5 @@
+package semifiveHomework.`young.seo`
+
 object Solution {
     def solution(absolutes: Vector[Int], signs: Vector[Boolean]): Int = {
         

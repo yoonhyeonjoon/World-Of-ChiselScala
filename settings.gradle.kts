@@ -1,2 +1,2 @@
-rootProject.name = "gradleRocketchip"
+rootProject.name = "WorldOfChiselScala"
 

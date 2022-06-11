@@ -1,4 +1,6 @@
-object Solution {
+package semifiveHomework.yohan.scala
+
+object SolutionDay2 {
     def solution(absolutes: Vector[Int], signs: Vector[Boolean]): Int = {
 
         var total_adder : Int = 0

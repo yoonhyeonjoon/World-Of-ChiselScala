@@ -33,4 +33,5 @@ class MyCalc(opt : Int) extends Module {
     io.carry := wire(opt)
 }
 
-println(getVerilogString(new MyCalc(8)))
+
+//println(getVerilogString(new MyCalc(8)))

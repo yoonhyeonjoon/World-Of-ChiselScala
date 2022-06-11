@@ -1,4 +1,6 @@
-object Solution {
+package semifiveHomework.yohan.scala
+
+object SolutionDay1 {
     def isHappy(n: Int): Boolean = {
 
         var now_input : Int = n
