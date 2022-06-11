@@ -1,3 +1,1 @@
-# gradleRocketchip
-
-https://github.com/yoonhyeonjoon/ChiselGuide
+https://github.com/yoonhyeonjoon/World-Of-ChiselScala
