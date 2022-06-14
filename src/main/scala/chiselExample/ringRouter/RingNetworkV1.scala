@@ -43,41 +43,35 @@ class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
 //  routers(0).io.in.bits := io.ports(0).in.bits
   routers(0).io.in <> io.ports(0).in
   routers(0).io.out <> io.ports(0).out
+  //  io.ports(1).in.ready := routers(1).io.in.ready
+  //  io.ports(1).out.bits := routers(1).io.out.bits
+  //  io.ports(1).out.valid := routers(1).io.out.valid
+  routers(1).io.in <> io.ports(1).in
+  routers(1).io.out <> io.ports(1).out
+
 
 //  routers(0).io.host.in.valid := io.ports(0).in.valid
 //  routers(0).io.host.in.bits := io.ports(0).in.bits
 //  routers(0).io.host.out.ready := io.ports(0).out.ready
   routers(0).io.host.in <> io.ports(0).in
   routers(0).io.host.out <> io.ports(0).out
-
-//  routers(1).io.out.ready := io.ports(1).out.ready
-//  routers(1).io.in.bits := io.ports(1).in.bits
-//  routers(1).io.in.valid := io.ports(1).in.valid
-  routers(1).io.in <> io.ports(1).in
-  routers(1).io.out <> io.ports(1).out
-
-//  io.ports(0).in.ready := routers(0).io.in.ready
-//  io.ports(0).out.bits := routers(0).io.out.bits
-//  io.ports(0).out.valid := routers(0).io.out.valid
-  routers(0).io.in <> io.ports(0).in
-  routers(0).io.out <> io.ports(0).out
-
-//  io.ports(1).in.ready := routers(1).io.in.ready
-//  io.ports(1).out.bits := routers(1).io.out.bits
-//  io.ports(1).out.valid := routers(1).io.out.valid
-  routers(1).io.in <> io.ports(1).in
-  routers(1).io.out <> io.ports(1).out
-
-//  routers(1).io.host.in.valid := io.ports(1).in.valid
-//  routers(1).io.host.in.bits := io.ports(1).in.bits
-//  routers(1).io.host.out.ready := io.ports(1).out.ready
+  //  routers(1).io.host.in.valid := io.ports(1).in.valid
+  //  routers(1).io.host.in.bits := io.ports(1).in.bits
+  //  routers(1).io.host.out.ready := io.ports(1).out.ready
   routers(1).io.host.in <> io.ports(1).in
   routers(1).io.host.out <> io.ports(1).out
+
+////  io.ports(0).in.ready := routers(0).io.in.ready
+////  io.ports(0).out.bits := routers(0).io.out.bits
+////  io.ports(0).out.valid := routers(0).io.out.valid
+//  routers(0).io.in <> io.ports(0).in
+//  routers(0).io.out <> io.ports(0).out
+
 
 }
 
 
-object RingNetworkV1 extends App {
+object RingNetworkV1Runnable extends App {
 
 //  generating(new RingRouterV1(RingNetworkParams(2, UInt(5.W)), 0))
   generating(new RingNetworkV1(RingNetworkParams(2, UInt(5.W))))
