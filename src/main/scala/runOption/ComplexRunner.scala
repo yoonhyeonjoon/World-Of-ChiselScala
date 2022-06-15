@@ -8,9 +8,9 @@ object ComplexRunner {
 
   def generating(module : =>RawModule, dir : String = "gcd"){
     (new ChiselStage).emitVerilog(module)
-    (new ElkStage).execute(
-      Array("-td", dir),
-      Seq(ChiselGeneratorAnnotation(() => module))
-    )
+//    (new ElkStage).execute(
+//      Array("-td", dir),
+//      Seq(ChiselGeneratorAnnotation(() => module))
+//    )
   }
 }
