@@ -13,6 +13,14 @@ class MyCounter5(cp: CounterParams5) extends Module {
     val en  = Input(Bool())
     val out = Output(UInt(cp.width.W))
   })
+
+  val io2 = IO(new Bundle {
+    val en  = Input(Bool())
+    val in = Output(UInt(cp.width.W))
+  })
+
+  io.out := io2.in
+
   val count = RegInit(cp.start.U(cp.width.W))
   when (io.en) {
     when (count < cp.limit.U) {
