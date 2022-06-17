@@ -76,6 +76,7 @@ class ConnectivityPractice1(n: Int, m: Int) extends Module {
 
 
 object ConnectivityPractice1 extends App{
+
   (new ChiselStage).emitVerilog(new ConnectivityPractice1(8,15))
   //(new ChiselStage).emitVerilog(f.asInstanceOf[RawModule])
   val targetDir = "test_run_dir/gcd"

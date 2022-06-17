@@ -64,7 +64,6 @@ object CountIntoQueue extends App {
 
 
   test(new CountIntoQueue(4,5,pipe=false,flow=false)) { c =>
-
 //    c.io.out.ready.poke(false.B)
     for (cycle <- 0 until 100) {   // Fill up queue
 

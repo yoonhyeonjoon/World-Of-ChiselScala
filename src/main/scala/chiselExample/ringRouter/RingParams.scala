@@ -16,4 +16,3 @@ class RingPortIO[T <: chisel3.Data](p: RingNetworkParams[T]) extends Bundle {
   val in: DecoupledIO[RingMessage[T]] = Flipped(Decoupled(new RingMessage(p)))
   val out: DecoupledIO[RingMessage[T]] = Decoupled(new RingMessage(p))
 }
-

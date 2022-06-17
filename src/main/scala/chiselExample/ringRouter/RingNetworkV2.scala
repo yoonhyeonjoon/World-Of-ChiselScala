@@ -17,5 +17,5 @@ class RingNetworkV2[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[
     curr
   }
 
-  routers.zip(io.ports).foreach { case (router, port) => router.io.host <> port}
+//  routers.zip(io.ports).foreach { case (router, port) => router.io.host <> port}
 }
