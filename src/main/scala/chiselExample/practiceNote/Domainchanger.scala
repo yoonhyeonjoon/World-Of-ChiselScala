@@ -11,51 +11,52 @@ import runOption.ComplexRunner.generating
 
 class Domainchanger(domainParams : DomainParams) extends Module {
 
-  val inputNumber = 5
-  val outputNumber = 10
 
   class DomainchangerBundle extends Bundle {
-    val in: DecoupledIO[Vec[UInt]] = Flipped(Decoupled(Vec(inputNumber, UInt(4.W))))
-    val out: Vec[UInt] = Output(Vec(outputNumber, UInt(10.W)))
-    val checker : UInt = Output(UInt(10.W))
+    val in: DecoupledIO[Vec[UInt]] = Flipped(Decoupled(Vec(domainParams.inputNumber, UInt(domainParams.outputBits.W)))) //input size depends on outputNumber
+    val out: Vec[UInt] = Output(Vec(domainParams.outputNumber, UInt(domainParams.inputBits.W))) //counting number depends on inputNumber.
   }
 
   val io: DomainchangerBundle = IO(new DomainchangerBundle)
   val readyReg: Bool = RegInit(true.B)
 
-  val caseMatcher: Counter = Counter(inputNumber+1)
-  println(s"counter info : start : ${caseMatcher.range.start} / end : ${caseMatcher.range.end}")
+  val caseMatcher: Counter = Counter(domainParams.inputNumber+1)
+//  println(s"counter info : start : ${caseMatcher.range.start} / end : ${caseMatcher.range.end}")
 
   when(io.in.fire) {
-    printf("increase %d %d\n", caseMatcher.value, io.in.ready)
+//    printf("increase %d %d\n", caseMatcher.value, io.in.ready)
     caseMatcher.inc()
   }
   .otherwise {
-    printf("reseted %d %d\n", caseMatcher.value, io.in.ready)
+//    printf("reseted %d %d\n", caseMatcher.value, io.in.ready)
     caseMatcher.reset()
   }
 
+  val endConditionNumber = 99999
   val candidateValue: UInt = MuxLookup(caseMatcher.value, 0.U, {
-      val indexedSeq: IndexedSeq[(UInt, UInt)] = io.in.bits.zipWithIndex.map { case (value: UInt, index: Int) => (index.U, value) }
-      val finalState = indexedSeq :+ (indexedSeq.size.U, (inputNumber+1).U)
+      val indexedSeq: IndexedSeq[(UInt, UInt)] = io.in.bits.zipWithIndex.map { case (inputValue: UInt, inputIndex: Int) =>
+          (inputIndex.U, inputValue)
+      }
+      val finalState = indexedSeq :+ (indexedSeq.size.U, endConditionNumber.U)
       finalState
     }
   )
 
-  val filled: Seq[UInt] = Seq.fill(outputNumber)(RegInit(UInt(100.W), 0.U))
+  val filled: Seq[UInt] = Seq.fill(domainParams.outputNumber)(RegInit(UInt(domainParams.inputBits.W), 0.U))
 
   filled.zip(io.out).zipWithIndex.foreach{ case (value, index) =>
-    when(index.U === candidateValue){
-      filled(index) := filled(index) + 1.U
-    }.elsewhen(candidateValue === (inputNumber+1).U)
-    {
-      readyReg := false.B
+    when(io.in.fire){
+      when(index.U === candidateValue){
+        filled(index) := filled(index) + 1.U
+      }.elsewhen(candidateValue === endConditionNumber.U)
+      {
+        readyReg := false.B
+      }
     }
     value._2 := value._1
   }
 
   io.in.ready := readyReg
-  io.checker := readyReg
 }
 
 
@@ -63,20 +64,22 @@ object Domainchanger extends App {
 
   case class DomainParams(inputNumber : Int, outputNumber : Int){
     def bitSize(numb : Int) = log2Ceil(numb + 1)
+    val inputBits: Int = bitSize(inputNumber)
+    val outputBits: Int = bitSize(outputNumber)
   }
 
-  generating(new Domainchanger(DomainParams(1000, 100)))
+  generating(new Domainchanger(DomainParams(inputNumber = 1000, outputNumber = 100)))
 
-  test(new Domainchanger(DomainParams(1000, 100))) { c =>
+  test(new Domainchanger(DomainParams(inputNumber = 1000, outputNumber = 100))) { c =>
 
     c.io.in.valid.poke(true.B)
     c.io.in.bits(0).poke(3.U)
-    c.io.in.bits(1).poke(5.U)
-    c.io.in.bits(2).poke(5.U)
-    c.io.in.bits(3).poke(8.U)
-    c.io.in.bits(4).poke(8.U)
-    for(p <- 0 until 50) {
-      println(p, " / ",c.io.out.peek()," /  ", c.io.checker.peek())
+    c.io.in.bits(1).poke(3.U)
+    c.io.in.bits(2).poke(3.U)
+    c.io.in.bits(3).poke(3.U)
+    c.io.in.bits(4).poke(1.U)
+    for(p <- 0 until 15) {
+      println(p, " / ", c.io.out.peek()," /  ")
       c.clock.step()
     }
 
