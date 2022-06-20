@@ -35,7 +35,7 @@ class CountIntoQueue(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean)
 
 object QuestTester extends App{
 
-  (new ChiselStage).emitVerilog(new CountIntoQueue(3,1,false,false))
+//  (new ChiselStage).emitVerilog(new CountIntoQueue(3,1,false,false))
 
 
   test(new CountIntoQueue(3,1,false, true)) { c =>

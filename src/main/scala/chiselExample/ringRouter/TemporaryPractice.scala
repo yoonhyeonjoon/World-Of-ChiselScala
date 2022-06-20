@@ -1,7 +1,7 @@
-package chiselExample.ringRouter
+package chiselExample.ringRouter.testtemporary
 
 import chisel3._
-import chisel3.util.{Decoupled, DecoupledIO}
+import chisel3.util.{Decoupled, DecoupledIO, PriorityEncoder}
 import runOption.ComplexRunner.generating
 
 class Smalls(id: Int) extends Module {
@@ -29,7 +29,8 @@ class Smalls(id: Int) extends Module {
   io.outBackward := buffer2 //io.inFrontWard + io.inBackward
 }
 
-class Circular extends Module {
+class CircularTester extends Module {
+
 
   class CircularBundle extends Bundle {
     val in = Input(UInt(10.W))
@@ -45,19 +46,50 @@ class Circular extends Module {
   smalls1.io.inBackward := io.in
   smalls1.io.inFrontWard := smalls2.io.outBackward
 
-  smalls2.io.inBackward := smalls1.io.outFrontWard
-  smalls2.io.inFrontWard := 0.U
-
   io.out := smalls2.io.outFrontWard
+
+  class TestBundle extends Bundle {
+    val inputTest: DecoupledIO[Vec[UInt]] = Flipped(Decoupled(Vec(2, UInt(10.W))))
+    val inputTest2: Vec[DecoupledIO[UInt]] = Vec(2, Flipped(Decoupled(UInt(10.W))))
+  }
+  val ioTest = IO(new TestBundle)
+
+//  val switch = WireInit(Bool(), true.B)
+  ioTest.inputTest.ready := true.B
+//  ioTest.inputTest.bits := Vec(2, 5.U)
+  when(ioTest.inputTest.valid === true.B){
+    smalls2.io.inBackward := smalls1.io.outFrontWard + ioTest.inputTest.bits(1)
+  }.otherwise{
+    smalls2.io.inBackward := smalls1.io.outFrontWard
+  }
+
+  for (i <- 0 until 2) {
+    if (io.in == i.U) {
+      ioTest.inputTest2(0).ready:= true.B
+      ioTest.inputTest2(1).ready:= true.B
+    }
+    else{
+      ioTest.inputTest2(0).ready:= true.B
+      ioTest.inputTest2(1).ready:= true.B
+    }
+  }
+
+
+  ioTest.inputTest2
+
+  val ff = PriorityEncoder("b0110".U)
+
+  smalls2.io.inFrontWard := ff
+
 
 }
 
 
-object Circular extends App {
+object CircularTester extends App {
 
 
 //  generating(new RingRouterV1(RingNetworkParams(2, UInt(5.W)), 0))
-  generating(new Circular())
+  generating(new CircularTester())
 
 }
 

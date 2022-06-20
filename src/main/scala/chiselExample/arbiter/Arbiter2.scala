@@ -2,6 +2,7 @@ package chiselExample.arbiter
 
 import chisel3._
 import chisel3.util._
+import runOption.ComplexRunner.generating
 
 class MyArb(numPorts: Int, n: Int) extends Module {
   val io = IO(new Bundle {
@@ -33,5 +34,8 @@ class MyArb2(numPorts: Int, n: Int) extends Module {
   val chosenOH = PriorityEncoderOH(inValids)
   io.out.bits := Mux1H(chosenOH, io.req map { _.bits })
   io.req.zip(chosenOH) foreach { case (i, c) => i.ready := c && io.out.fire}
+}
 
+object MyArb2 extends App{
+  generating(new MyArb2(5,6))
 }

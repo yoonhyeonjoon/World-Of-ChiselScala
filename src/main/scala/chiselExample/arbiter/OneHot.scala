@@ -34,5 +34,6 @@ class ConvUIntToOH(inWidth: Int) extends Module {
 }
 
 object ConvUIntToOH extends App {
+
     generating(new ConvUIntToOH(3))
 }

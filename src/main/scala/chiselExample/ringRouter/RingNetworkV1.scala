@@ -14,6 +14,7 @@ class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
 
   val io: RingRouterV1Bundle = IO(new RingRouterV1Bundle)
 
+
   val forMe: Bool = (io.in.bits.addr === id.U) && io.in.valid
   io.host.in.ready := io.out.ready
   io.host.out.valid := forMe

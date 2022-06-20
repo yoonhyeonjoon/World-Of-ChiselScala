@@ -1,0 +1,5 @@
+package grammarForChisel
+
+class PriorityEncoder {
+
+}
