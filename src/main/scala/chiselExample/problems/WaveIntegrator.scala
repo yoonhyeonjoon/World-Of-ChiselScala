@@ -1,4 +1,4 @@
-package chiselExample.practiceNote
+package chiselExample.problems
 
 import Chisel.log2Ceil
 import chisel3._
@@ -54,7 +54,7 @@ class VolumeIntegrator(volumeIntegratorParams:VolumeIntegratorParams) extends Mo
   }
 
 
-  val scale = (volumeIntegratorParams.inputNumber*volumeIntegratorParams.timemainFactor).U
+  val scale: UInt = (volumeIntegratorParams.inputNumber*volumeIntegratorParams.timemainFactor).U
   io.out := stateSaver / scale
   printf("stateSaver : %d + %d - %d, / %d => io.out = %d \n", stateSaver, currentInputSum, delayed.io.out, scale, io.out)
 

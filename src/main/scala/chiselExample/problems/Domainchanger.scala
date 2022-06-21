@@ -1,10 +1,8 @@
-package chiselExample.practiceNote
-
+package chiselExample.problems
 
 import chisel3._
 import chisel3.tester.{testableClock, testableData}
-import chisel3.util.{Counter, Decoupled, DecoupledIO, MuxLookup, log2Ceil}
-import chiselExample.practiceNote.Domainchanger.DomainParams
+import chisel3.util._
 import chiseltest.RawTester.test
 import runOption.ComplexRunner.generating
 
