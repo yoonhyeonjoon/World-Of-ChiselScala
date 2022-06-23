@@ -34,9 +34,7 @@ class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
 
 class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
 
-  class RingNetworkV1Port extends Bundle {
-    val ports: Vec[RingPortIO[T]] = Vec(p.numHosts, new RingPortIO(p))
-  }
+  class RingNetworkV1Port extends Bundle {val ports: Vec[RingPortIO[T]] = Vec(p.numHosts, new RingPortIO(p))}
 
   val io: RingNetworkV1Port = IO(new RingNetworkV1Port())
   val routers: Seq[RingRouterV1[T]] = Seq.tabulate(p.numHosts){ id => Module(new RingRouterV1(p, id))}
@@ -48,7 +46,7 @@ class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {
 
   routers.zip(io.ports).foreach {
     case (router, port) =>
-    router.io.host <> port
+      router.io.host <> port
       router.io.out <> port.out
   }
 

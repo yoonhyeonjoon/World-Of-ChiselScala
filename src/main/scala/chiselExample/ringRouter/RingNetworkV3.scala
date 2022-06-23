@@ -35,45 +35,95 @@ class RingRouterV3[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
   }
 
   val xbarParams: RingNetworkParams[RingMessage[T]] = RingNetworkParams(3, new RingMessage(p))
+  val xbar: CrossBarV3[RingMessage[T]] = Module(new CrossBarV3(xbarParams))
 
-  val xbar = Module(new CrossBarV3(xbarParams))
   val portsRouted: IndexedSeq[RingPortIO[RingMessage[T]]] = io.ports map { port =>
     val routed = Wire(new RingPortIO(xbarParams))
-    // INCOMPLETE, need to connect ready & valids
     routed.in.bits.addr := nextHop(port.in.bits.addr)
     routed.in.bits.data := port.in.bits
+    routed.in.valid :=  port.in.valid
+
+    routed.in.ready := true.B
+    port.in.ready := routed.in.ready
+
+    routed.out.ready := port.out.ready
+    routed.out.valid := port.in.valid
+    port.out.valid := true.B
+
     port.out.bits := routed.out.bits.data
+
     routed
   }
 
-  portsRouted.zip(xbar.io.ports).foreach{ case (extPort, xbarPort) => extPort <> xbarPort }
+  portsRouted.zip(xbar.io.ports).foreach {
+    case (extPort, xbarPort) => extPort <> xbarPort
+  }
 
 }
 
 class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[T](p) {
+
   val routers: Seq[RingRouterV3[T]] = Seq.tabulate(p.numHosts){ id => Module(new RingRouterV3(p, id)) }
-//  routers.foldLeft(routers.last){
-//    (prev, curr) =>
-//      prev.io.ports(1).out <> curr.io.ports(0).in
-//      prev.io.ports(1).in <> curr.io.ports(0).out
-////      prev.io.ports(1) <> curr.io.ports(0)
-//      curr
-//  }
+  routers.foldLeft(routers.last){
+    (prev, curr) =>
+//      prev.io.ports(1) <> curr.io.ports(0)
 
-  routers(0).io.ports(1) <> routers(2).io.ports(1)
-  routers(1).io.ports(1) <> routers(0).io.ports(1)
-  routers(2).io.ports(1) <> routers(1).io.ports(1)
+      val outReady0    =  RegNext(curr.io.ports(0).out.ready)
+      val outValid0    =  RegNext(curr.io.ports(0).out.valid)
+      val outBitsAddr0 =  RegNext(curr.io.ports(0).out.bits.addr)
+      val outBitsData0 =  RegNext(curr.io.ports(0).out.bits.data)
+
+      val inReady0     =  RegNext(curr.io.ports(0).in.ready)
+      val inValid0     =  RegNext(curr.io.ports(0).in.valid)
+      val inBitsAddr0  =  RegNext(curr.io.ports(0).in.bits.addr)
+      val inBitsData0  =  RegNext(curr.io.ports(0).in.bits.data)
+
+      inValid0 := prev.io.ports(1).out.valid
+      inBitsAddr0 := prev.io.ports(1).out.bits.addr
+      inBitsData0 := prev.io.ports(1).out.bits.data
+      prev.io.ports(1).out.ready := inReady0
+
+      prev.io.ports(1).in.valid := outValid0
+      prev.io.ports(1).in.bits.addr := outBitsAddr0
+      prev.io.ports(1).in.bits.data := outBitsData0
+      outReady0 := prev.io.ports(1).in.ready
+
+      val outReady1    =  RegNext(curr.io.ports(1).out.ready)
+      val outValid1    =  RegNext(curr.io.ports(1).out.valid)
+      val outBitsAddr1 =  RegNext(curr.io.ports(1).out.bits.addr)
+      val outBitsData1 =  RegNext(curr.io.ports(1).out.bits.data)
+
+      val inReady1     =  RegNext(curr.io.ports(1).in.ready)
+      val inValid1     =  RegNext(curr.io.ports(1).in.valid)
+      val inBitsAddr1  =  RegNext(curr.io.ports(1).in.bits.addr)
+      val inBitsData1  =  RegNext(curr.io.ports(1).in.bits.data)
+
+      inValid1 := prev.io.ports(0).out.valid
+      inBitsAddr1 := prev.io.ports(0).out.bits.addr
+      inBitsData1 := prev.io.ports(0).out.bits.data
+      prev.io.ports(0).out.ready := inReady1
+
+      prev.io.ports(0).in.valid := outValid1
+      prev.io.ports(0).in.bits.addr := outBitsAddr1
+      prev.io.ports(0).in.bits.data := outBitsData1
+      outReady1 := prev.io.ports(0).in.ready
+
+      curr
+  }
+
+  routers.zip(io.ports).foreach {
+    case (router, port) => router.io.ports(2) <> port
+  }
+
+  val ff = 1
 
 
-  routers.zip(io.ports).foreach { case (router, port) => router.io.ports(2) <> port }
 }
 
 
 
 
-object ComplexQueue extends App {
-  //UInt(p.payloadSize.W)
-
-    generating(new RingRouterV3(p = RingNetworkParams(5, UInt(5.W)), id = 0))
-//    generating(new RingNetworkV3(p = RingNetworkParams(5, UInt(5.W))))
+object RingNetworkV3 extends App {
+//    generating(new RingRouterV3(p = RingNetworkParams(5, UInt(5.W)), id = 0))
+    generating(new RingNetworkV3(p = RingNetworkParams(2, UInt(5.W))))
 }

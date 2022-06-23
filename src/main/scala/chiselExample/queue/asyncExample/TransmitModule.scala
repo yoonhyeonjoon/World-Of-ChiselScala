@@ -27,7 +27,6 @@ class TransmitModule extends Module {
   val counter: Counter = Counter(AsyncCrossingValue.values.length + 1)
 
   when (counter.value < AsyncCrossingValue.values.length.U) {
-
     val candidateValue = MuxLookup(counter.value, 0.U,
       AsyncCrossingValue.values.zipWithIndex.map {
         case (value: Int, index: Int) => (index.U, value.U)
