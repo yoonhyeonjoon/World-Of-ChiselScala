@@ -29,7 +29,6 @@ class RingRouterV1[T <: chisel3.Data](p: RingNetworkParams[T], id: Int) extends 
   val validBits: RingMessage[T] = Reg(new RingMessage(p))
   validBits := Mux(io.host.in.fire, io.host.in.bits, io.in.bits)
   io.out.bits := validBits
-
 }
 
 class RingNetworkV1[T <: chisel3.Data](p: RingNetworkParams[T]) extends Module {

@@ -66,7 +66,6 @@ class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[
   val routers: Seq[RingRouterV3[T]] = Seq.tabulate(p.numHosts){ id => Module(new RingRouterV3(p, id)) }
   routers.foldLeft(routers.last){
     (prev, curr) =>
-//      prev.io.ports(1) <> curr.io.ports(0)
 
       val outReady0    =  RegNext(curr.io.ports(0).out.ready)
       val outValid0    =  RegNext(curr.io.ports(0).out.valid)
@@ -115,9 +114,6 @@ class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[
     case (router, port) => router.io.ports(2) <> port
   }
 
-  val ff = 1
-
-
 }
 
 
@@ -125,5 +121,5 @@ class RingNetworkV3[T <: chisel3.Data](p: RingNetworkParams[T]) extends Network[
 
 object RingNetworkV3 extends App {
 //    generating(new RingRouterV3(p = RingNetworkParams(5, UInt(5.W)), id = 0))
-    generating(new RingNetworkV3(p = RingNetworkParams(2, UInt(5.W))))
+    generating(new RingNetworkV3(p = RingNetworkParams(10, UInt(5.W))))
 }

@@ -9,9 +9,6 @@ import runOption.ComplexRunner.generating
 
 import scala.util.Random.nextGaussian
 
-
-
-
 class Testabler extends Module{
 
   class TestableBundle extends Bundle {
@@ -19,8 +16,8 @@ class Testabler extends Module{
   }
 
   val testableBundle:TestableBundle = IO(new TestableBundle())
-  val domainChanger:Domainchanger = Module(new Domainchanger(DomainParams(inputNumber=1000, outputNumber = 100)))
-  val transmit:Seq[ElementTransmitModule[UInt]] = Seq.fill(1000)(Module(new ElementTransmitModule[UInt](Seq(java.lang.Math.max(50+nextGaussian()*4, 0).toInt.U))))
+  val domainChanger = Module(new semifiveHomework.dias.histogram.Domainchanger(semifiveHomework.dias.histogram.DomainParams(inputNumber=1000, outputNumber = 100)))
+  val transmit: Seq[ElementTransmitModule[UInt]] = Seq.fill(1000)(Module(new ElementTransmitModule[UInt](Seq(java.lang.Math.max(50+nextGaussian()*4, 0).toInt.U))))
 
   domainChanger.io.in.valid := true.B
   transmit.zipWithIndex.foreach{ case (aGenerator, index) =>
@@ -28,12 +25,11 @@ class Testabler extends Module{
     domainChanger.io.in.bits(index) := aGenerator.io.generatedSimpleOutput
   }
 
-  testableBundle.out.zip(domainChanger.io.out).foreach { case (out, in) => out := in}
-
+  domainChanger.io.out.ready := true.B
+  testableBundle.out.zip(domainChanger.io.out.bits).foreach { case (out, in) => out := in}
 }
 
 object TestModule extends App{
-
   generating(new Testabler())
 }
 
@@ -55,14 +51,11 @@ class Domainchanger(domainParams : DomainParams) extends Module {
   val readyReg: Bool = RegInit(true.B)
 
   val caseMatcher: Counter = Counter(domainParams.inputNumber+1)
-//  println(s"counter info : start : ${caseMatcher.range.start} / end : ${caseMatcher.range.end}")
 
   when(io.in.fire) {
-//    printf("increase %d %d\n", caseMatcher.value, io.in.ready)
     caseMatcher.inc()
   }
   .otherwise {
-//    printf("reseted %d %d\n", caseMatcher.value, io.in.ready)
     caseMatcher.reset()
   }
 
