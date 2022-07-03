@@ -33,17 +33,18 @@ class VolumeIntegrator(volumeIntegratorParams:VolumeIntegratorParams) extends Mo
     io.out := count
   }
 
-  val io= IO(new VolumeIntegratorBundle)
+  val io = IO(new VolumeIntegratorBundle)
 
   val averageOfInput: UInt = (io.in.reduce{_ +& _}) / (volumeIntegratorParams.inputNumber).U
 
+  //volumeIntegratorParams.outputBits 해당 부분 에러
   val vecOfAverageOfInput: Vec[UInt] = RegInit(VecInit(Seq.fill(volumeIntegratorParams.timemainFactor)(0.U((volumeIntegratorParams.outputBits).W))))
 
   val count = Module(new Counter(volumeIntegratorParams.timemainFactor))
 
   vecOfAverageOfInput(count.io.out) := averageOfInput
 
-  io.out := (vecOfAverageOfInput.reduce(_ +& _)) / (volumeIntegratorParams.timemainFactor).U
+  io.out := vecOfAverageOfInput.reduce(_ +& _) / (volumeIntegratorParams.timemainFactor).U
 }
 
 

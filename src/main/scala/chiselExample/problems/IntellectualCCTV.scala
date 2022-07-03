@@ -3,15 +3,21 @@ package chiselExample.problems
 import Chisel.{Decoupled, log2Ceil}
 import chisel3._
 import chisel3.internal.firrtl.Width
-import chisel3.util.DecoupledIO
+import chisel3.util.{Cat, Counter, DecoupledIO}
 import runOption.ComplexRunner.generating
 
 
 //960 x 480 x 24bits
 //=> 960 x (480 x 24) bits
 case class IntellectualCCTVParams(
-           videoWidth:Int = 960, videoHeight:Int = 480, colorDomain:Int = 3,
-            colorScale:Int = 8/**256bit*/, hardfixFrameCoefficient:Int, hardfixSensitivityThreshold:Int)
+                                   videoWidth:Int = 960,
+                                   videoHeight:Int = 8,
+                                   colorDomain:Int = 3,
+                                   colorScale:Int = 8/**256bit*/,
+                                   hardfixFrameCoefficient:Int = 50,
+                                   hardfixL1NormSensitivityThreshold:Int,
+                                   hardfixFrameSensitivityThreshold:Int
+                                 )
 {
   def bitSize(numb : Int): Int = log2Ceil(numb + 1)
   val inputBits: Int = colorDomain*colorScale
@@ -20,37 +26,112 @@ case class IntellectualCCTVParams(
 
 class IntellectualCCTV(intellectualCCTVParams:IntellectualCCTVParams) extends Module {
 
-  val videoFrame:Int = intellectualCCTVParams.videoHeight
-  val dataSize: Width = (intellectualCCTVParams.videoWidth * intellectualCCTVParams.inputBits).W
-  val bufferSize:Int = 10000
+  val videoLines:Int = intellectualCCTVParams.videoHeight
+  val videoWidth:Int = intellectualCCTVParams.videoWidth
+  val lineDataSize: Width = (intellectualCCTVParams.videoWidth * intellectualCCTVParams.inputBits).W
+
 
   class VolumeIntegratorBundle extends Bundle {
-    val videoInput: Vec[UInt] = Input(Vec(videoFrame, UInt(dataSize)))
+    val videoInput: Vec[UInt] = Input(Vec(videoLines, UInt(lineDataSize)))
     val getResult: Bool = Input(Bool())
-    val AlertOutput: Vec[UInt] = Output(Vec(videoFrame, UInt(dataSize)))
+//    val AlertOutput: Vec[UInt] = Output(Vec(vidoeLines, UInt(lineDataSize)))
 //    val Output2: DecoupledIO[Vec[UInt]] = Decoupled(Vec(videoFrame, UInt(dataSize)))
+    val OutputR: Vec[UInt] = Output(Vec(videoLines, UInt()))
+    val OutputG: Vec[UInt] = Output(Vec(videoLines, UInt()))
+    val OutputB: Vec[UInt] = Output(Vec(videoLines, UInt()))
+//    val OutputGround: Vec[UInt] = Output(Vec(videoLines*videoWidth, UInt()))
   }
 
   val io: VolumeIntegratorBundle = IO(new VolumeIntegratorBundle())
 
-  val voxel:Seq[UInt] = Seq.fill(videoFrame)(RegInit(0.U((bufferSize*intellectualCCTVParams.colorScale).W)))
+  case class Pixel(colors:Seq[UInt])
+  val videoSeq: Seq[Seq[Pixel]] = Seq.tabulate(intellectualCCTVParams.videoHeight){ heightIndex =>
+    val pixelSeq: Seq[Pixel] = Seq.tabulate(intellectualCCTVParams.videoWidth){ widthIndex =>
+      val colorSeq: Seq[UInt] = Seq.tabulate(intellectualCCTVParams.colorDomain){ colorOrder =>
+        WireInit(
+          UInt(
+            intellectualCCTVParams.colorScale.W), io.videoInput(heightIndex) >> (intellectualCCTVParams.colorDomain*intellectualCCTVParams.colorScale*widthIndex + intellectualCCTVParams.colorScale*colorOrder)
+        ).asUInt
+      }
+      Pixel(colorSeq)
+    }
+    pixelSeq
+  }
 
-  voxel.zip(io.videoInput).foreach(it => {
+  val voxels: Seq[Seq[Vec[UInt]]] = //domain, widthxlines
+    Seq.fill(intellectualCCTVParams.colorDomain)(
+      Seq.fill(videoWidth * videoLines)(
+        RegInit(VecInit(
+          Seq.fill(intellectualCCTVParams.hardfixFrameCoefficient)(
+            RegInit(0.U((intellectualCCTVParams.hardfixFrameCoefficient*intellectualCCTVParams.colorScale).W)))
+      )))
+    )
 
-    val setR = it._2
-    it._1 := it._1 + it._2
+  val evalCounter: (UInt, Bool) = Counter(true.B, intellectualCCTVParams.hardfixFrameCoefficient)
 
-  })
+  voxels.zipWithIndex.foreach{ zipSet => {
+    val aColorDomained = zipSet._1
+    val idx = zipSet._2
+    for (yy <- 0 until videoLines) {
+      for (xx <- 0 until videoWidth) {
+        aColorDomained(yy*videoWidth + xx)(evalCounter._1) := videoSeq(yy)(xx).colors(idx)
+      }
+    }
+  }}
 
-  io.AlertOutput <> voxel
+  val gapShower: Seq[UInt] = Seq.fill(videoLines*videoWidth)(Wire(UInt()))
 
-//  voxel(0).suggestName("hello")
-//  io.AlertOutput := 1.U
+  voxels.zipWithIndex.foreach{ zipSet =>
+    val aColorDomained = zipSet._1
+    val idx = zipSet._2
+    for (yy <- 0 until videoLines) {
+      for (xx <- 0 until videoWidth) {
+        val aCummulative = aColorDomained(yy*videoWidth + xx).reduce{ _ +& _ }
+        val aCurrent = videoSeq(yy)(xx).colors(idx)
+        val comparator = Wire(UInt())
+        when(aCummulative > aCurrent) {
+          comparator := aCummulative - aCurrent
+        }.otherwise{
+          comparator := aCurrent - aCummulative
+        }
+        when(intellectualCCTVParams.hardfixL1NormSensitivityThreshold.U < comparator){
+          gapShower(yy*videoWidth + xx) := 1.U
+        }.otherwise{
+          gapShower(yy*videoWidth + xx) := 0.U
+        }
+      }
+    }
+  }
+
+  for (yy <- 0 until videoLines) {
+    for (xx <- 0 until videoWidth) {
+//      io.OutputGround(yy*videoWidth + xx) := gapShower(yy*videoWidth + xx)
+    }
+  }
+
+
+
+
+  for (yy <- 0 until videoLines) {
+    var containerR = 0.U
+    var containerG = 0.U
+    var containerB = 0.U
+    for (xx <- 0 until videoWidth) {
+      containerR = voxels(0)(yy*videoWidth + xx).reduce{ _ +& _ }
+      containerG = voxels(1)(yy*videoWidth + xx).reduce{ _ +& _ }
+      containerB = voxels(2)(yy*videoWidth + xx).reduce{ _ +& _ }
+    }
+
+    io.OutputR(yy) := containerR
+    io.OutputG(yy) := containerG
+    io.OutputB(yy) := containerB
+
+  }
 
 
 }
 
 object IntellectualCCTV extends App {
-  generating(new IntellectualCCTV(IntellectualCCTVParams(hardfixFrameCoefficient = 5, hardfixSensitivityThreshold = 3)))
+  generating(new IntellectualCCTV(IntellectualCCTVParams(hardfixFrameCoefficient = 5, hardfixL1NormSensitivityThreshold = 20, hardfixFrameSensitivityThreshold = 35)))
 
 }
