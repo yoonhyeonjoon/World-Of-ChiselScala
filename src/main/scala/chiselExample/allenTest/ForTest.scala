@@ -6,24 +6,18 @@ import chisel3.util.{Counter, Decoupled, log2Ceil}
 import chiselExample.mouduleTester.ValidReceiver
 import runOption.ComplexRunner.generating
 
-class CountWhenReady(n: Int) extends Module {
+class Tester(n: Int) extends Module {
   val io = IO(new Bundle {
-    val en  = Input(Bool())
-    val in = Flipped(Decoupled(UInt(5.W)))
-    val out =  Decoupled(UInt(5.W))
+    val in  = Input(UInt(10.W))
+    val out =  Output(UInt())
   })
 
-  io.in <> io.out
-
-
+  io.out := io.in(9, 1)
 }
-
-
 
 object ForTest extends App
 {
-  generating(new CountWhenReady(5))
-
+  generating(new Tester(5))
 }
 
 

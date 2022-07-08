@@ -13,8 +13,12 @@ class SimpleQueue(maxVal: Int, numEntries: Int, pipe: Boolean, flow: Boolean) ex
   val io = IO(new Bundle {
     val en  = Input(Bool())
     val count = Output(UInt())
+    val outputTest = Output(UInt(5.W))
 //    val outChecker = Output(UInt())
   })
+
+  val hello: UInt = "b101011011101111".U
+  io.outputTest := hello(5,0)
 
   private val q = Module(new Queue(UInt(), numEntries, pipe=pipe, flow=flow))
   val (count, wrap) = Counter(q.io.enq.fire, maxVal)

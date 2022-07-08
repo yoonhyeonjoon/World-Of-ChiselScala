@@ -96,8 +96,6 @@ class VolumeIntegrator(volumeIntegratorParams:VolumeIntegratorParams) extends Mo
   }
 
   val io: VolumeIntegratorBundle = IO(new VolumeIntegratorBundle)
-  val maxBitSize: Int = volumeIntegratorParams.bitSize(volumeIntegratorParams.inputNumber * volumeIntegratorParams.maxWaveHeight*volumeIntegratorParams.timeDomainFactor)
-  val stateSaver: UInt = RegInit(0.U(35.W))
   val currentInputSum: UInt = io.in.reduce{_+&_}
 
   val delayed: GripperInDelayNCycles[UInt] = Module(new GripperInDelayNCycles(data=UInt(), cycle=volumeIntegratorParams.timeDomainFactor))
@@ -105,116 +103,12 @@ class VolumeIntegrator(volumeIntegratorParams:VolumeIntegratorParams) extends Mo
 
   val scale: UInt = (volumeIntegratorParams.inputNumber * volumeIntegratorParams.timeDomainFactor).U
   io.out := delayed.io.out.foldLeft(0.U)((prev, curr) => prev +& curr) / scale
+
   printf("current input sum : %d / %d, average of waves height : %d \n", currentInputSum, scale, io.out)
+
 }
 
-object VolumeIntegrator extends App{
+object VolumeIntegrator extends App
+{
   generating(new VolumeIntegrator(VolumeIntegratorParams(maxWaveHeight = 10,inputNumber = 5, timeDomainFactor = 4)))
-
-
-//  test(new VolumeIntegrator(VolumeIntegratorParams(maxWaveHeight = 10,inputNumber = 5, timemainFactor = 4))) { c =>
-//
-//    c.io.in(0).poke(5.U)
-//    c.io.in(1).poke(1.U)
-//    c.io.in(2).poke(2.U)
-//    c.io.in(3).poke(3.U)
-//    c.io.in(4).poke(4.U) // = 15
-//    c.clock.step()
-//
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(2.U)
-//    c.io.in(1).poke(3.U)
-//    c.io.in(2).poke(4.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(6.U) //20
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(1.U)
-//    c.io.in(1).poke(1.U)
-//    c.io.in(2).poke(2.U)
-//    c.io.in(3).poke(3.U)
-//    c.io.in(4).poke(4.U) // = 11
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(4.U)
-//    c.io.in(1).poke(3.U)
-//    c.io.in(2).poke(4.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(6.U) //22
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(4.U)
-//    c.io.in(1).poke(5.U)
-//    c.io.in(2).poke(6.U)
-//    c.io.in(3).poke(7.U)
-//    c.io.in(4).poke(8.U) //30
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//
-//    c.io.in(0).poke(8.U)
-//    c.io.in(1).poke(3.U)
-//    c.io.in(2).poke(4.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(6.U) //26
-//    c.clock.step()
-//
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(5.U)
-//    c.io.in(1).poke(5.U)
-//    c.io.in(2).poke(6.U)
-//    c.io.in(3).poke(7.U)
-//    c.io.in(4).poke(8.U) //31
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(4.U)
-//    c.io.in(1).poke(1.U)
-//    c.io.in(2).poke(2.U)
-//    c.io.in(3).poke(3.U)
-//    c.io.in(4).poke(4.U)// = 14
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(1.U)
-//    c.io.in(1).poke(3.U)
-//    c.io.in(2).poke(4.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(6.U) //19
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(3.U)
-//    c.io.in(1).poke(1.U)
-//    c.io.in(2).poke(2.U)
-//    c.io.in(3).poke(3.U)
-//    c.io.in(4).poke(4.U)// = 13
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(1.U)
-//    c.io.in(1).poke(3.U)
-//    c.io.in(2).poke(4.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(5.U) //18
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//    c.io.in(0).poke(4.U)
-//    c.io.in(1).poke(1.U)
-//    c.io.in(2).poke(2.U)
-//    c.io.in(3).poke(5.U)
-//    c.io.in(4).poke(4.U)// = 16
-//    c.clock.step()
-//    println(c.io.out.peek() + " " + c.io.outChecker.peek() + " " + c.io.outDelayedChecker.peek())
-//
-//  }
-//
-
-
 }
