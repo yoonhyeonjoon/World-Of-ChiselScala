@@ -12,6 +12,8 @@ class Tester(n: Int) extends Module {
     val out =  Output(UInt())
   })
 
+  val redreg: Vec[Vec[UInt]] = Reg(Vec(15, Vec(15, UInt(8.W))))
+
   io.out := io.in(9, 1)
 }
 

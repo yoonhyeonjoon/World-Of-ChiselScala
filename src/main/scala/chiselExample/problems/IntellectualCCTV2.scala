@@ -4,7 +4,7 @@ import Chisel.log2Ceil
 import chisel3._
 import chisel3.internal.firrtl.Width
 import chisel3.tester.{testableClock, testableData}
-import chisel3.util.Counter
+import chisel3.util.{Cat, Counter}
 import chiselExample.problems.imageProcesser.ImageLoader
 import runOption.ComplexRunner.generating
 
@@ -49,7 +49,7 @@ class IntellectualCCTVReal(intellectualCCTVParams:IntellectualCCTVRealParams) ex
     val videoInput: UInt = Input(UInt(lineDataSize))
     val getResult: Bool = Input(Bool())
 //    val AlertOutput: Bool = Output(Bool())
-//    val Output2: UInt = Output(UInt(lineDataSize))
+    val Output2: UInt = Output(UInt(lineDataSize))
 //    val OutputGround: Vec[UInt] = Output(Vec(videoLines*videoWidth, UInt()))
   }
 
@@ -73,64 +73,44 @@ class IntellectualCCTVReal(intellectualCCTVParams:IntellectualCCTVRealParams) ex
   }
 
   case class Pixel(colors:Seq[UInt])
-  val frameBuffer: Vec[UInt] = Reg(Vec(intellectualCCTVParams.hardfixFrameCoefficient * videoLines * videoWidth, UInt(24.W)))
+  val frameBuffer: Vec[UInt] = Reg(Vec(intellectualCCTVParams.hardfixFrameCoefficient, UInt((intellectualCCTVParams.inputBits  * videoLines * videoWidth).W)))
+  val frameAvg: UInt = Reg(UInt((intellectualCCTVParams.inputBits  * videoLines * videoWidth).W))
   val bufferLocationCounter: (UInt, Bool) = Counter(true.B, intellectualCCTVParams.hardfixFrameCoefficient)
 
   //  frameBuffer(bufferLocationCounter._1)((pixelLocator.value * intellectualCCTVParams.transSpeed.U) + 0.U) := io.videoInput(24*(0+1), 24*0)
   //  frameBuffer(bufferLocationCounter._1)((pixelLocator.value * intellectualCCTVParams.transSpeed.U) + 1.U) := io.videoInput(24*(1+1), 24*1)
   //  frameBuffer(bufferLocationCounter._1)((pixelLocator.value * intellectualCCTVParams.transSpeed.U) + 2.U) := io.videoInput(24*(2+1), 24*2)
+
+  var catter1 = Wire(UInt())
+
   for(i <- 0 until intellectualCCTVParams.transSpeed)
   {
-    frameBuffer(bufferLocationCounter._1)((pixelLocator.value * intellectualCCTVParams.transSpeed.U) +& i.U) := io.videoInput(24*(i+1), 24*i)
+//    frameBuffer(bufferLocationCounter._1)((pixelLocator.value * intellectualCCTVParams.transSpeed.U) +& i.U) := io.videoInput(24*(i+1), 24*i)
+    catter1 = Cat(catter1, io.videoInput(24*(i+1), 24*i))
+  }
+  frameBuffer(bufferLocationCounter._1) := catter1
+
+//  frameAvg(0) = ( frameBuffer(0.U)(0) + frameBuffer(1.U)(0) + frameBuffer(2.U)(0) + frameBuffer(3.U)(0)  + frameBuffer(4.U)(0) + frameBuffer(5.U)(0) ) / n ...
+//  frameAvg(1) = ( frameBuffer(0.U)(1) + frameBuffer(1.U)(1) + frameBuffer(2.U)(1) + frameBuffer(3.U)(1)  + frameBuffer(4.U)(1) + frameBuffer(5.U)(1) ) / n ...
+//  frameAvg(2) = ( frameBuffer(0.U)(2) + frameBuffer(1.U)(2) + frameBuffer(2.U)(2) + frameBuffer(3.U)(2)  + frameBuffer(4.U)(2) + frameBuffer(5.U)(2) ) / n ...
+
+  var catter: UInt = Wire(UInt())
+  for(i <- 0 until videoLines * videoWidth)
+  {
+//    frameAvg(i) :=
+    catter = Cat(catter, frameBuffer.reduce(_(i) +& _(i)) / intellectualCCTVParams.hardfixFrameCoefficient.U)
   }
 
-
-//  val fff  = ff(0) + ff2(0) + ff3(0) + ff4(0) + ff5(0) + ff6(0)
-//  val fff2 = ff(1) + ff2(1) + ff3(1) + ff4(1) + ff5(1) + ff6(1)
-////  val fff3 = sum of elements(i)
-
-//  val ppp = frameBuffer.map{ aFrame =>
-//    val aFrameGrouped = aFrame.zipWithIndex.groupBy{ aPixel =>
-//      aPixel._2
+//  val networkFrame: UInt = network.zipWithIndex.foldLeft(aTarget){ (previous, target) =>
+//    if(target._2 != 0) {
+//      Cat(previous, target._1.io.outputLooker.asUInt)
 //    }
-//  }
-//
-//  val gg = frameBuffer.groupBy{ aFrame =>
-//    val pp = aFrame.zipWithIndex
-//    pp.sortBy(_._2)
-//  }
-//
-//  val lll = 1
-
-  //
-//  val voxels: Seq[Seq[Vec[UInt]]] = //domain, widthxlines
-//    Seq.fill(videoWidth * videoLines)(
-//      Seq.fill(intellectualCCTVParams.colorDomain)(
-//        RegInit(VecInit(
-//          Seq.fill(intellectualCCTVParams.hardfixFrameCoefficient)(
-//            RegInit(0.U((intellectualCCTVParams.hardfixFrameCoefficient*intellectualCCTVParams.colorScale).W)))
-//      )))
-//    )
-//
-//  val evalCounter: (UInt, Bool) = Counter(true.B, intellectualCCTVParams.hardfixFrameCoefficient)
-//
-//  for (yy <- 0 until videoLines) {
-//    for (xx <- 0 until videoWidth) {
-//      voxels(yy*videoWidth + xx).zipWithIndex.foreach{ aPixelSet =>
-//        aPixelSet._1(evalCounter._1) := videoSeq(yy)(xx).colors(aPixelSet._2)
-//      }
-//    }
-//  }
-//
-//  val gapShower: Seq[UInt] = Seq.fill(videoLines*videoWidth)(Wire(UInt()))
-//
-//  for (yy <- 0 until videoLines) {
-//    for (xx <- 0 until videoWidth) {
-//
-//
+//    else{
+//      previous
 //    }
 //  }
 
+  io.Output2 := catter
 
 
 }
@@ -140,7 +120,7 @@ class IntellectualCCTVReal(intellectualCCTVParams:IntellectualCCTVRealParams) ex
 object IntellectualCCTVRealUsage extends App {
 
 
-//  generating(new IntellectualCCTVReal(IntellectualCCTVRealParams(hardfixFrameCoefficient = 5, hardfixL1NormSensitivityThreshold = 20, hardfixFrameSensitivityThreshold = 35)))
+  generating(new IntellectualCCTVReal(IntellectualCCTVRealParams(hardfixFrameCoefficient = 5, hardfixL1NormSensitivityThreshold = 20, hardfixFrameSensitivityThreshold = 35)))
 
 //  val getResult: Bool = Input(Bool())
 //
@@ -229,6 +209,7 @@ object IntellectualCCTVRealUsage extends App {
         val endSignal = "b" + "1" + iterator(24*setPacketBlockSize,"0")
         c.io.videoInput.poke(endSignal.U)
         c.clock.step()
+
       }
 
     }

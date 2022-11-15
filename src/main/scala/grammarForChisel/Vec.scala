@@ -13,4 +13,6 @@ class Vec {
 
   //Vec(200, Reg(UInt(10).W))) 이와 같은 사용은 구현단에서 불가. fill { Reg ( ) } 형태로 사용해야함
 
+  //2중  Vec은 아래와 같이 사용가능
+  //val redreg: Vec[Vec[UInt]] = Reg(Vec(15, Vec(15, UInt(8.W))))
 }
