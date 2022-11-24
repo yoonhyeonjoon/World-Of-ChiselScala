@@ -45,6 +45,8 @@ object MyMux extends App{
   val ff2 = Seq(1,2,3,4,5)
   val gggg2 = ff2(3)
   (new ChiselStage).emitVerilog(new MyMux())
+
+
   //(new ChiselStage).emitVerilog(f.asInstanceOf[RawModule])
 
 
@@ -56,5 +58,6 @@ class MyMuxN(n: Int, m: Int) extends Module {
     val sel = Input(UInt(log2Ceil(n).W))
     val out = Output(UInt(m.W))
   })
+
   io.out := io.in(io.sel)
 }

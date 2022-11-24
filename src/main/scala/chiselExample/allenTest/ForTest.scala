@@ -13,8 +13,10 @@ class Tester(n: Int) extends Module {
   })
 
   val redreg: Vec[Vec[UInt]] = Reg(Vec(15, Vec(15, UInt(8.W))))
+  val count1 = RegInit(0.U(3.W))
 
-  io.out := io.in(9, 1)
+  io.out := count1//io.in(9, 1)
+
 }
 
 object ForTest extends App
